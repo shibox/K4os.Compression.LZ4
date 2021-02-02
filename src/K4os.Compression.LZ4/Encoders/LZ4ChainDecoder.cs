@@ -20,6 +20,14 @@ namespace K4os.Compression.LZ4.Encoders
 		/// <param name="blockSize">Block size.</param>
 		/// <param name="extraBlocks">Number of extra blocks.</param>
 		public LZ4ChainDecoder(int blockSize, int extraBlocks)
+			: this(blockSize, extraBlocks, null, 0) { }
+
+		/// <summary>Creates new instance of <see cref="LZ4ChainDecoder"/>.</summary>
+		/// <param name="blockSize">Block size.</param>
+		/// <param name="extraBlocks">Number of extra blocks.</param>
+		/// <param name="dictionary">Dictionary pointer.</param>
+		/// <param name="dictionarySize">Dictionary size.</param>
+		public LZ4ChainDecoder(int blockSize, int extraBlocks, byte* dictionary, int dictionarySize)
 		{
 			blockSize = Mem.RoundUp(Math.Max(blockSize, Mem.K1), Mem.K1);
 			extraBlocks = Math.Max(extraBlocks, 0);
@@ -29,6 +37,8 @@ namespace K4os.Compression.LZ4.Encoders
 			_outputIndex = 0;
 			_outputBuffer = (byte*) Mem.Alloc(_outputLength + 8);
 			_context = LL.LZ4_createStreamDecode();
+			
+			PreloadDict(dictionary, dictionarySize);
 		}
 
 		/// <inheritdoc />
@@ -69,7 +79,7 @@ namespace K4os.Compression.LZ4.Encoders
 			{
 				Mem.Move(_outputBuffer + _outputIndex, source, length);
 				_outputIndex = ApplyDict(_outputIndex + length);
-			} 
+			}
 			else if (length >= Mem.K64)
 			{
 				Mem.Move(_outputBuffer, source, length);
@@ -113,8 +123,23 @@ namespace K4os.Compression.LZ4.Encoders
 			return dictSize;
 		}
 
+		private void PreloadDict(byte* dictionary, int dictionaryLength)
+		{
+			if (dictionary == null || dictionaryLength <= 0)
+				return;
+
+			if (dictionaryLength > Mem.K64)
+			{
+				dictionary += dictionaryLength - Mem.K64;
+				dictionaryLength = Mem.K64;
+			}
+			
+			Mem.Move(_outputBuffer, dictionary, dictionaryLength);
+			_outputIndex = ApplyDict(dictionaryLength);
+		}
+
 		private int ApplyDict(int index)
-		{ 
+		{
 			var dictStart = Math.Max(index - Mem.K64, 0);
 			var dictSize = index - dictStart;
 			LL.LZ4_setStreamDecode(_context, _outputBuffer + dictStart, dictSize);

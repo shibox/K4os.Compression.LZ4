@@ -11,7 +11,8 @@
 		/// <summary>Creates new instance of <see cref="LZ4BlockEncoder"/></summary>
 		/// <param name="level">Compression level.</param>
 		/// <param name="blockSize">Block size.</param>
-		public LZ4BlockEncoder(LZ4Level level, int blockSize): base(false, blockSize, 0) => 
+		public LZ4BlockEncoder(LZ4Level level, int blockSize):
+			base(false, blockSize, 0, null, 0) =>
 			_level = level;
 
 		/// <inheritdoc />
@@ -21,5 +22,8 @@
 
 		/// <inheritdoc />
 		protected override int CopyDict(byte* target, int dictionaryLength) => 0;
+
+		/// <inheritdoc />
+		protected override void LoadDict(byte* dictionary, int dictionaryLength) { }
 	}
 }

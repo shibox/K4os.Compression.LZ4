@@ -27,7 +27,7 @@ namespace K4os.Compression.LZ4.Engine
 					source, target, sourceLength, targetLength),
 				Algorithm.X32 => LL32.LZ4_decompress_safe(
 					source, target, sourceLength, targetLength),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_decompress_safe))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_decompress_safe)),
 			};
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -39,7 +39,7 @@ namespace K4os.Compression.LZ4.Engine
 					context, source, target, sourceLength, targetLength),
 				Algorithm.X32 => LL32.LZ4_decompress_safe_continue(
 					context, source, target, sourceLength, targetLength),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_decompress_safe_continue))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_decompress_safe_continue)),
 			};
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -51,7 +51,7 @@ namespace K4os.Compression.LZ4.Engine
 					source, target, sourceLength, targetLength, acceleration),
 				Algorithm.X32 => LL32.LZ4_compress_fast(
 					source, target, sourceLength, targetLength, acceleration),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_fast))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_fast)),
 			};
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -68,7 +68,7 @@ namespace K4os.Compression.LZ4.Engine
 					context,
 					source, target, sourceLength, targetLength,
 					acceleration),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_fast_continue))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_fast_continue)),
 			};
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -79,7 +79,7 @@ namespace K4os.Compression.LZ4.Engine
 					source, target, sourceLength, targetLength, level),
 				Algorithm.X32 => LL32.LZ4_compress_HC(
 					source, target, sourceLength, targetLength, level),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_HC))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_HC)),
 			};
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -91,7 +91,15 @@ namespace K4os.Compression.LZ4.Engine
 					context, source, target, sourceLength, targetLength),
 				Algorithm.X32 => LL32.LZ4_compress_HC_continue(
 					context, source, target, sourceLength, targetLength),
-				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_HC_continue))
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_compress_HC_continue)),
+			};
+		
+		public static int LZ4_loadDict(
+			LL.LZ4_stream_t* LZ4_dict, byte* dictionary, int dictSize) =>
+			LL.Algorithm switch {
+				Algorithm.X64 => LL64.LZ4_loadDict(LZ4_dict, dictionary, dictSize),
+				Algorithm.X32 => LL32.LZ4_loadDict(LZ4_dict, dictionary, dictSize),
+				_ => throw AlgorithmNotImplemented(nameof(LZ4_loadDict)),
 			};
 	}
 }

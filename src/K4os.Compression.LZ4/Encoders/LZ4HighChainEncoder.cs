@@ -18,13 +18,28 @@ namespace K4os.Compression.LZ4.Encoders
 		/// <param name="blockSize">Block size.</param>
 		/// <param name="extraBlocks">Number of extra blocks.</param>
 		public LZ4HighChainEncoder(LZ4Level level, int blockSize, int extraBlocks = 0):
-			base(true, blockSize, extraBlocks)
+			this(level, blockSize, extraBlocks, null, 0) { }
+
+		/// <summary>Creates new instance of <see cref="LZ4HighChainEncoder"/></summary>
+		/// <param name="level">Compression level.</param>
+		/// <param name="blockSize">Block size.</param>
+		/// <param name="extraBlocks">Number of extra blocks.</param>
+		/// <param name="dictionary">External dictionary.</param>
+		/// <param name="dictionarySize">External dictionary size.</param>
+		public LZ4HighChainEncoder(
+			LZ4Level level, int blockSize, int extraBlocks,
+			byte* dictionary, int dictionarySize):
+			base(true, blockSize, extraBlocks, dictionary, dictionarySize)
 		{
 			if (level < LZ4Level.L03_HC) level = LZ4Level.L03_HC;
 			if (level > LZ4Level.L12_MAX) level = LZ4Level.L12_MAX;
 			_context = LL.LZ4_createStreamHC();
 			LL.LZ4_resetStreamHC_fast(_context, (int) level);
+			Initialize();
 		}
+
+		protected override void LoadDict(byte* dictionary, int dictionaryLength) => 
+			LL.LZ4_loadDictHC(_context, dictionary, dictionaryLength);
 
 		/// <inheritdoc />
 		protected override void ReleaseUnmanaged()

@@ -153,7 +153,7 @@ namespace K4os.Compression.LZ4.Engine
 			LZ4_dict->dictionary = dictEnd - LZ4_dict->dictSize;
 		}
 
-		public int LZ4_loadDict(LZ4_stream_t* LZ4_dict, byte* dictionary, int dictSize)
+		public static int LZ4_loadDict(LZ4_stream_t* LZ4_dict, byte* dictionary, int dictSize)
 		{
 			const int HASH_UNIT = ALGORITHM_ARCH;
 			var dict = LZ4_dict;
