@@ -21,11 +21,10 @@ namespace K4os.Compression.LZ4.Encoders
 		/// <param name="chaining">Needs to be <c>true</c> if using dependent blocks.</param>
 		/// <param name="blockSize">Block size.</param>
 		/// <param name="extraBlocks">Number of extra blocks.</param>
-		/// <param name="dictionary">External dictionary (optional, will be copied).</param>
-		/// <param name="dictionaryLength">External dictionary length (if exists).</param>
+		/// <param name="dictionary">External dictionary (optional, can be empty).</param>
 		protected LZ4EncoderBase(
 			bool chaining, int blockSize, int extraBlocks,
-			byte* dictionary, int dictionaryLength)
+			ReadOnlySpan<byte> dictionary)
 		{
 			blockSize = Mem.RoundUp(Math.Max(blockSize, Mem.K1), Mem.K1);
 			extraBlocks = Math.Max(extraBlocks, 0);
@@ -36,7 +35,7 @@ namespace K4os.Compression.LZ4.Encoders
 			_inputIndex = _inputPointer = 0;
 			_inputBuffer = (byte*) Mem.Alloc(_inputLength + 8);
 			
-			PreloadDict(dictionary, Math.Min(dictSize, dictionaryLength));
+			PreloadDict(chaining ? dictionary : ReadOnlySpan<byte>.Empty);
 		}
 
 		/// <inheritdoc />
@@ -45,19 +44,20 @@ namespace K4os.Compression.LZ4.Encoders
 		/// <inheritdoc />
 		public int BytesReady => _inputPointer - _inputIndex;
 		
-		private void PreloadDict(byte* dictionary, int dictionaryLength)
+		private void PreloadDict(ReadOnlySpan<byte> dictionary)
 		{
-			if (dictionary == null || dictionaryLength <= 0)
-				return;
+			var length = dictionary.Length;
+			if (length <= 0) return;
 
-			if (dictionaryLength > Mem.K64)
+			if (length > Mem.K64)
 			{
-				dictionary += dictionaryLength - Mem.K64;
-				dictionaryLength = Mem.K64;
+				dictionary = dictionary.Slice(length - Mem.K64);
+				length = dictionary.Length;
 			}
 
-			Mem.Move(_inputBuffer, dictionary, dictionaryLength);
-			_inputIndex = _inputPointer = dictionaryLength;
+			fixed (byte* dictionaryP = dictionary)
+				Mem.Move(_inputBuffer, dictionaryP, length);
+			_inputIndex = _inputPointer = length;
 		}
 		
 		/// <summary>

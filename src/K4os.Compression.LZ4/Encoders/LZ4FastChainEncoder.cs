@@ -1,4 +1,5 @@
-﻿using K4os.Compression.LZ4.Engine;
+﻿using System;
+using K4os.Compression.LZ4.Engine;
 
 namespace K4os.Compression.LZ4.Encoders
 {
@@ -15,17 +16,10 @@ namespace K4os.Compression.LZ4.Encoders
 		/// <summary>Creates new instance of <see cref="LZ4FastChainEncoder"/></summary>
 		/// <param name="blockSize">Block size.</param>
 		/// <param name="extraBlocks">Number of extra blocks.</param>
-		public LZ4FastChainEncoder(int blockSize, int extraBlocks = 0):
-			this(blockSize, extraBlocks, null, 0) { }
-
-		/// <summary>Creates new instance of <see cref="LZ4FastChainEncoder"/></summary>
-		/// <param name="blockSize">Block size.</param>
-		/// <param name="extraBlocks">Number of extra blocks.</param>
 		/// <param name="dictionary">Dictionary pointer.</param>
-		/// <param name="dictionarySize">Dictionary size.</param>
 		public LZ4FastChainEncoder(
-			int blockSize, int extraBlocks, byte* dictionary, int dictionarySize):
-			base(true, blockSize, extraBlocks, dictionary, dictionarySize)
+			int blockSize, int extraBlocks, ReadOnlySpan<byte> dictionary):
+			base(true, blockSize, extraBlocks, dictionary)
 		{
 			_context = LL.LZ4_createStream();
 			Initialize();
